@@ -8,7 +8,6 @@ import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-nati
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 import { PublisherGithub } from '@electron-forge/publisher-github';
 import type { ForgeConfig } from '@electron-forge/shared-types';
-import type { NotaryToolCredentials } from '@electron/notarize/lib/types';
 import path from 'path';
 
 import { MakerDebConfigOptions } from '@electron-forge/maker-deb/dist/Config';
@@ -53,11 +52,13 @@ const config: ForgeConfig = {
                 };
             }
         },
-        osxNotarize: {
-            appleApiKey: process.env.APPLE_API_KEY,
-            appleApiKeyId: process.env.APPLE_API_KEY_ID,
-            appleApiIssuer: process.env.APPLE_API_ISSUER
-        } as NotaryToolCredentials,
+        osxNotarize: process.env.APPLE_ID
+            ? {
+                appleId: process.env.APPLE_ID,
+                appleIdPassword: process.env.APPLE_ID_PASSWORD,
+                teamId: process.env.APPLE_TEAM_ID
+            }
+            : undefined,
         extraResource: ['./public']
     },
     rebuildConfig: {},
@@ -107,13 +108,13 @@ const config: ForgeConfig = {
         ),
         ...(process.argv[3] === 'x64'
             ? [
-                  new MakerAppImage(
-                      {
-                          options: devAndRpmOptions
-                      },
-                      ['linux']
-                  )
-              ]
+                new MakerAppImage(
+                    {
+                        options: devAndRpmOptions
+                    },
+                    ['linux']
+                )
+            ]
             : [])
     ],
     plugins: [
